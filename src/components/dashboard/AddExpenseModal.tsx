@@ -59,7 +59,7 @@ export default function AddExpenseModal({ categories }: AddExpenseModalProps) {
       {/* FAB — pill shape with label */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-24 right-5 z-40 bg-gradient-to-br from-[#001939] to-[#002d5e] text-white flex items-center gap-2.5 px-6 py-4 rounded-full shadow-[0_12px_32px_-4px_rgba(0,25,57,0.4)] hover:scale-105 active:scale-95 transition-all"
+        className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-5 z-40 bg-gradient-to-br from-[#001939] to-[#002d5e] text-white flex items-center gap-2.5 px-6 py-4 rounded-full shadow-[0_12px_32px_-4px_rgba(0,25,57,0.4)] hover:scale-105 active:scale-95 transition-all"
       >
         <Plus className="h-5 w-5" strokeWidth={2.5} />
         <span className="font-headline font-bold text-sm tracking-wide">Hinzufügen</span>
