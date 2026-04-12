@@ -53,7 +53,7 @@ export default function ExpenseList({ expenses, categories }: ExpenseListProps) 
               <span className="font-bold text-[#191c1d] text-sm tabular-nums">
                 −{formatEuro(expense.amount)}
               </span>
-              <Pencil className="h-3.5 w-3.5 text-[#747780] opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Pencil className="h-3.5 w-3.5 text-[#747780]" />
             </div>
           </button>
         ))}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Trash2 } from 'lucide-react'
@@ -32,8 +32,8 @@ export default function EditExpenseSheet({
   const [date, setDate] = useState('')
   const [isFavorite, setIsFavorite] = useState(false)
 
-  function handleOpen(val: boolean) {
-    if (val && expense) {
+  useEffect(() => {
+    if (open && expense) {
       setAmount(expense.amount.toString().replace('.', ','))
       setDescription(expense.description)
       setCategoryId(expense.category?.id ?? '')
@@ -41,6 +41,9 @@ export default function EditExpenseSheet({
       setIsFavorite(expense.is_favorite)
       setConfirmDelete(false)
     }
+  }, [open, expense])
+
+  function handleOpen(val: boolean) {
     onOpenChange(val)
   }
 
