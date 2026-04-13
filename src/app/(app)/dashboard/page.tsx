@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getUser, getProfile } from '@/lib/supabase/cached'
 import BudgetGauge from '@/components/dashboard/BudgetGauge'
 import FavoriteTiles from '@/components/dashboard/FavoriteTiles'
 import RecentExpensesList from '@/components/dashboard/RecentExpensesList'
@@ -7,19 +8,14 @@ import { format, startOfMonth, endOfMonth } from 'date-fns'
 import type { ExpenseWithCategory } from '@/types/database'
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const [user, supabase] = await Promise.all([getUser(), createClient()])
 
   const now = new Date()
   const monthStart = format(startOfMonth(now), 'yyyy-MM-dd')
   const monthEnd = format(endOfMonth(now), 'yyyy-MM-dd')
 
-  const [profileResult, expensesResult, categoriesResult, favoritesResult] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('monthly_budget, email')
-      .eq('id', user!.id)
-      .single(),
+  const [profile, expensesResult, categoriesResult, favoritesResult] = await Promise.all([
+    getProfile(user!.id),
     supabase
       .from('expenses')
       .select('*, category:categories(*)')
@@ -42,7 +38,6 @@ export default async function DashboardPage() {
       .limit(50),
   ])
 
-  const profile = profileResult.data
   const allExpenses = (expensesResult.data ?? []) as ExpenseWithCategory[]
   const categories = categoriesResult.data ?? []
 

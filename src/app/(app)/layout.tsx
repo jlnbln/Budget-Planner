@@ -1,22 +1,16 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getUser, getProfile } from '@/lib/supabase/cached'
 import BottomNav from '@/components/layout/BottomNav'
 import DailyRecurringCheck from '@/components/layout/DailyRecurringCheck'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getUser()
 
   if (!user) {
     redirect('/anmelden')
   }
 
-  // Fetch user's profile for budget
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('monthly_budget, email')
-    .eq('id', user.id)
-    .single()
+  const profile = await getProfile(user.id)
 
   const budget = profile?.monthly_budget ?? 1000
   const initial = (profile?.email ?? user.email ?? 'U')[0].toUpperCase()

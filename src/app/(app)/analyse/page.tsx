@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getUser, getProfile } from '@/lib/supabase/cached'
 import SavingsSummary from '@/components/analyse/SavingsSummary'
 import CategoryPieChart from '@/components/analyse/CategoryPieChart'
 import MonthlyTrendChart from '@/components/analyse/MonthlyTrendChart'
@@ -10,8 +11,7 @@ import type { ExpenseWithCategory, MonthlySavings } from '@/types/database'
 import { subMonths, format, startOfMonth, endOfMonth } from 'date-fns'
 
 export default async function AnalysePage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const [user, supabase] = await Promise.all([getUser(), createClient()])
 
   const now = new Date()
   const month = now.getMonth() + 1
@@ -23,18 +23,14 @@ export default async function AnalysePage() {
   const lyMonthStart = format(startOfMonth(new Date(lastYear, month - 1)), 'yyyy-MM-dd')
   const lyMonthEnd = format(endOfMonth(new Date(lastYear, month - 1)), 'yyyy-MM-dd')
 
-  const sixMonthsAgo = subMonths(now, 5)
-  const sixMonthsAgoStart = `${sixMonthsAgo.getFullYear()}-${String(sixMonthsAgo.getMonth() + 1).padStart(2, '0')}-01`
-
   const [
-    profileResult,
+    profile,
     currentExpensesResult,
     savingsResult,
-    trendExpensesResult,
     lastYearExpensesResult,
     categoriesResult,
   ] = await Promise.all([
-    supabase.from('profiles').select('monthly_budget').eq('id', user!.id).single(),
+    getProfile(user!.id),
     supabase
       .from('expenses')
       .select('*, category:categories(*)')
@@ -49,12 +45,6 @@ export default async function AnalysePage() {
       .order('month', { ascending: true }),
     supabase
       .from('expenses')
-      .select('amount, expense_date')
-      .eq('user_id', user!.id)
-      .gte('expense_date', sixMonthsAgoStart)
-      .lt('expense_date', monthStart),
-    supabase
-      .from('expenses')
       .select('amount')
       .eq('user_id', user!.id)
       .gte('expense_date', lyMonthStart)
@@ -66,7 +56,7 @@ export default async function AnalysePage() {
       .order('sort_order'),
   ])
 
-  const budget = profileResult.data?.monthly_budget ?? 1000
+  const budget = profile?.monthly_budget ?? 1000
   const currentExpenses = (currentExpensesResult.data ?? []) as ExpenseWithCategory[]
   const pastSavings = (savingsResult.data ?? []) as MonthlySavings[]
   const categories = categoriesResult.data ?? []

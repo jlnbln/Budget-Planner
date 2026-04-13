@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getUser } from '@/lib/supabase/cached'
 import MonthNavigator from '@/components/ausgaben/MonthNavigator'
 import ExpenseList from '@/components/ausgaben/ExpenseList'
 import type { ExpenseWithCategory } from '@/types/database'
@@ -15,8 +16,7 @@ export default async function AusgabenPage({ searchParams }: AusgabenPageProps) 
   const month = params.monat ? parseInt(params.monat) : now.getMonth() + 1
   const year = params.jahr ? parseInt(params.jahr) : now.getFullYear()
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const [user, supabase] = await Promise.all([getUser(), createClient()])
 
   const monthStart = `${year}-${String(month).padStart(2, '0')}-01`
   const monthEnd = format(endOfMonth(new Date(year, month - 1)), 'yyyy-MM-dd')

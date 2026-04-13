@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getUser, getProfile } from '@/lib/supabase/cached'
 import BudgetSetting from '@/components/einstellungen/BudgetSetting'
 import CategoryManager from '@/components/einstellungen/CategoryManager'
 import RecurringExpenseManager from '@/components/einstellungen/RecurringExpenseManager'
@@ -8,11 +9,10 @@ import { LogOut } from 'lucide-react'
 import type { ExpenseWithCategory, RecurringExpense } from '@/types/database'
 
 export default async function EinstellungenPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const [user, supabase] = await Promise.all([getUser(), createClient()])
 
-  const [profileResult, categoriesResult, recurringResult, favoritesResult] = await Promise.all([
-    supabase.from('profiles').select('monthly_budget, email').eq('id', user!.id).single(),
+  const [profile, categoriesResult, recurringResult, favoritesResult] = await Promise.all([
+    getProfile(user!.id),
     supabase.from('categories').select('*').eq('user_id', user!.id).order('sort_order'),
     supabase
       .from('recurring_expenses')
@@ -21,14 +21,12 @@ export default async function EinstellungenPage() {
       .order('day_of_month'),
     supabase
       .from('expenses')
-      .select('*, category:categories(*)')
+      .select('id, amount, description, expense_date, is_favorite, category:categories(id,name,color,emoji,user_id,sort_order,created_at)')
       .eq('user_id', user!.id)
       .eq('is_favorite', true)
       .order('expense_date', { ascending: false })
       .limit(100),
   ])
-
-  const profile = profileResult.data
   const categories = categoriesResult.data ?? []
   const recurringExpenses = (recurringResult.data ?? []) as RecurringExpense[]
 
