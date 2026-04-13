@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BudgetPlaner
 
-## Getting Started
+A mobile-first personal budget tracker for two users. Track expenses, set a monthly budget, analyse spending by category, and manage recurring costs — all in German.
 
-First, run the development server:
+**Live:** deployed on Vercel · **Backend:** Supabase
+
+## Features
+
+- **Dashboard** — budget gauge (spent vs. remaining), favourite quick-add tiles, recent transactions
+- **Transaktionen** — month-by-month expense list with inline edit/delete
+- **Analyse** — category breakdown, monthly trend chart, budget utilisation, savings summary
+- **Einstellungen** — manage categories (emoji + colour), recurring expenses, favourites, monthly budget
+- **Recurring expenses** — automatically created once per month on the configured day; idempotent (safe against concurrent requests)
+- **Favourites** — save a description + category + amount as a template for fast re-entry
+- **PWA-ready** — installable on iOS/Android, respects safe-area insets
+
+## Tech stack
+
+| Layer | Choice |
+|---|---|
+| Framework | Next.js (App Router, server components) |
+| Styling | Tailwind v4 + shadcn/ui (`@base-ui/react`) |
+| Backend | Supabase (Postgres + Auth + RLS) |
+| Deployment | Vercel |
+| Language | TypeScript |
+
+## Getting started
+
+### 1. Clone & install
+
+```bash
+git clone https://github.com/jlnbln/Budget-Planner.git
+cd Budget-Planner
+npm install
+```
+
+### 2. Set up Supabase
+
+1. Create a project at [supabase.com](https://supabase.com)
+2. Run each migration in order in the **SQL Editor**:
+   - `supabase/migrations/0001_initial_schema.sql`
+   - `supabase/migrations/0002_fix_recurring_duplicates.sql`
+
+### 3. Configure environment
+
+Create `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 4. Run locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+  actions/        Server actions (auth, categories, expenses, recurring, settings)
+  app/
+    (app)/        Authenticated routes (dashboard, ausgaben, analyse, einstellungen)
+    (auth)/       Auth routes (anmelden, registrieren)
+  components/     Feature components + shadcn UI primitives
+  lib/            Supabase clients, calculations, recurring logic
+  types/          Database types and app interfaces
+supabase/
+  migrations/     SQL migrations — run manually in Supabase SQL Editor
+```
 
-## Learn More
+## Deployment
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Push to `main` — Vercel auto-deploys. Add the two environment variables in the Vercel project settings.
