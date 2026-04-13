@@ -19,30 +19,19 @@ export async function applyRecurringExpenses(userId: string): Promise<void> {
   for (const rec of recurring) {
     if (rec.day_of_month > todayDay) continue
 
-    const monthStart = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`
-    const monthEnd = format(endOfMonth(new Date(currentYear, currentMonth - 1)), 'yyyy-MM-dd')
+    const expenseDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(rec.day_of_month).padStart(2, '0')}`
 
-    const { data: existing } = await supabase
-      .from('expenses')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('recurring_id', rec.id)
-      .gte('expense_date', monthStart)
-      .lte('expense_date', monthEnd)
-      .maybeSingle()
-
-    if (!existing) {
-      const expenseDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(rec.day_of_month).padStart(2, '0')}`
-      await supabase.from('expenses').insert({
-        user_id: userId,
-        category_id: rec.category_id,
-        recurring_id: rec.id,
-        amount: rec.amount,
-        description: rec.name,
-        expense_date: expenseDate,
-        is_favorite: false,
-      })
-    }
+    // Use upsert with ignoreDuplicates so concurrent calls are idempotent.
+    // The unique index on (recurring_id, expense_date) enforces this at the DB level.
+    await supabase.from('expenses').upsert({
+      user_id: userId,
+      category_id: rec.category_id,
+      recurring_id: rec.id,
+      amount: rec.amount,
+      description: rec.name,
+      expense_date: expenseDate,
+      is_favorite: false,
+    }, { onConflict: 'recurring_id,expense_date', ignoreDuplicates: true })
   }
 }
 
