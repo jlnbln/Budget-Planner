@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { applyRecurringExpenses, checkAndFinalizeMonths } from '@/lib/recurring'
 import BottomNav from '@/components/layout/BottomNav'
+import DailyRecurringCheck from '@/components/layout/DailyRecurringCheck'
 import { Bell } from 'lucide-react'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -22,14 +22,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const budget = profile?.monthly_budget ?? 1000
   const initial = (profile?.email ?? user.email ?? 'U')[0].toUpperCase()
 
-  // Background tasks: apply recurring expenses + finalize past months
-  try {
-    await applyRecurringExpenses(user.id)
-    await checkAndFinalizeMonths(user.id, budget)
-  } catch {
-    // Non-critical — don't block the page
-  }
-
   return (
     <div className="flex flex-col min-h-dvh">
       {/* Top App Bar */}
@@ -46,6 +38,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <Bell className="h-5 w-5" strokeWidth={1.75} />
         </button>
       </header>
+
+      {/* Runs applyRecurringExpenses + checkAndFinalizeMonths once per day via a cookie gate */}
+      <DailyRecurringCheck userId={user.id} budget={budget} />
 
       <main className="flex-1 overflow-y-auto pb-28">
         {children}

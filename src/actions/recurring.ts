@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { applyRecurringExpenses } from '@/lib/recurring'
 
 export async function createRecurringExpense(data: {
   name: string
@@ -23,6 +24,11 @@ export async function createRecurringExpense(data: {
   })
 
   if (error) throw new Error(error.message)
+
+  // Apply immediately so the new expense is created for the current month
+  // if its day_of_month has already passed. The upsert is idempotent.
+  await applyRecurringExpenses(user.id)
+
   revalidatePath('/einstellungen')
 }
 

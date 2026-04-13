@@ -14,7 +14,7 @@ export default async function DashboardPage() {
   const monthStart = format(startOfMonth(now), 'yyyy-MM-dd')
   const monthEnd = format(endOfMonth(now), 'yyyy-MM-dd')
 
-  const [profileResult, expensesResult, categoriesResult] = await Promise.all([
+  const [profileResult, expensesResult, categoriesResult, favoritesResult] = await Promise.all([
     supabase
       .from('profiles')
       .select('monthly_budget, email')
@@ -33,6 +33,13 @@ export default async function DashboardPage() {
       .select('*')
       .eq('user_id', user!.id)
       .order('sort_order'),
+    supabase
+      .from('expenses')
+      .select('*, category:categories(*)')
+      .eq('user_id', user!.id)
+      .eq('is_favorite', true)
+      .order('expense_date', { ascending: false })
+      .limit(50),
   ])
 
   const profile = profileResult.data
@@ -43,16 +50,9 @@ export default async function DashboardPage() {
   const totalSpent = allExpenses.reduce((sum, e) => sum + e.amount, 0)
   const recentExpenses = allExpenses.slice(0, 5)
 
-  // Favorites from all time
-  const { data: allFavoritesData } = await supabase
-    .from('expenses')
-    .select('*, category:categories(*)')
-    .eq('user_id', user!.id)
-    .eq('is_favorite', true)
-    .order('expense_date', { ascending: false })
-    .limit(50)
+  const allFavoritesData = favoritesResult.data
 
-  const allFavorites = (allFavoritesData ?? []) as ExpenseWithCategory[]
+  const allFavorites = ((allFavoritesData ?? []) as ExpenseWithCategory[])
   const uniqueFavorites: ExpenseWithCategory[] = []
   const seen = new Set<string>()
   for (const fav of allFavorites) {
