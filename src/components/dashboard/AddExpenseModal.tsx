@@ -20,12 +20,14 @@ export default function AddExpenseModal({ categories }: AddExpenseModalProps) {
   const [description, setDescription] = useState('')
   const [categoryId, setCategoryId] = useState<string>('')
   const [isFavorite, setIsFavorite] = useState(false)
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0])
 
   function reset() {
     setAmount('')
     setDescription('')
     setCategoryId('')
     setIsFavorite(false)
+    setDate(new Date().toISOString().split('T')[0])
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -42,6 +44,7 @@ export default function AddExpenseModal({ categories }: AddExpenseModalProps) {
         description: description.trim(),
         category_id: categoryId || null,
         is_favorite: isFavorite,
+        expense_date: date,
       })
       toast.success('Ausgabe hinzugefügt')
       setOpen(false)
@@ -152,6 +155,22 @@ export default function AddExpenseModal({ categories }: AddExpenseModalProps) {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Date */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-[#43474f] uppercase tracking-widest">
+                  Datum
+                </label>
+                <div className="bg-[#e7e8e9] rounded-t-lg border-b-2 border-transparent focus-within:border-[#001939] transition-colors">
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full bg-transparent px-4 py-3.5 text-[#191c1d] outline-none"
+                    required
+                  />
+                </div>
               </div>
 
               {/* Favorite toggle */}
