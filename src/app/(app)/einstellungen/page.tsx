@@ -4,7 +4,7 @@ import CategoryManager from '@/components/einstellungen/CategoryManager'
 import RecurringExpenseManager from '@/components/einstellungen/RecurringExpenseManager'
 import FavoriteManager from '@/components/einstellungen/FavoriteManager'
 import { signOut } from '@/actions/auth'
-import { LogOut, Shield } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import type { ExpenseWithCategory, RecurringExpense } from '@/types/database'
 
 export default async function EinstellungenPage() {
@@ -90,19 +90,6 @@ export default async function EinstellungenPage() {
           />
         </div>
       </section>
-
-      {/* Privacy note */}
-      <div className="bg-[#ffdbcb] rounded-2xl p-5 flex items-center gap-4">
-        <div className="w-10 h-10 rounded-full bg-white/40 flex items-center justify-center flex-shrink-0">
-          <Shield className="h-5 w-5 text-[#511e00]" strokeWidth={1.75} />
-        </div>
-        <div>
-          <h3 className="font-semibold text-[#511e00] text-sm">Privatsphäre &amp; Sicherheit</h3>
-          <p className="text-xs text-[#511e00]/75 mt-0.5">
-            Deine Daten werden sicher verschlüsselt und niemals ohne deine Zustimmung geteilt.
-          </p>
-        </div>
-      </div>
 
       {/* Sign out */}
       <form action={signOut}>

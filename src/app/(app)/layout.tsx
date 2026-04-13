@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import BottomNav from '@/components/layout/BottomNav'
 import DailyRecurringCheck from '@/components/layout/DailyRecurringCheck'
-import { Bell } from 'lucide-react'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -34,9 +33,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             BudgetPlaner
           </span>
         </div>
-        <button className="text-[#43474f] hover:opacity-70 transition-opacity p-1" aria-label="Benachrichtigungen">
-          <Bell className="h-5 w-5" strokeWidth={1.75} />
-        </button>
       </header>
 
       {/* Runs applyRecurringExpenses + checkAndFinalizeMonths once per day via a cookie gate */}
