@@ -29,7 +29,7 @@ export async function createRecurringExpense(data: {
   // if its day_of_month has already passed. The upsert is idempotent.
   await applyRecurringExpenses(user.id)
 
-  revalidatePath('/einstellungen')
+  revalidatePath('/', 'layout')
 }
 
 export async function updateRecurringExpense(
@@ -53,7 +53,13 @@ export async function updateRecurringExpense(
     .eq('user_id', user.id)
 
   if (error) throw new Error(error.message)
-  revalidatePath('/einstellungen')
+
+  // If re-activating or changing amount/day, re-apply so the current month stays in sync.
+  if (data.is_active !== false) {
+    await applyRecurringExpenses(user.id)
+  }
+
+  revalidatePath('/', 'layout')
 }
 
 export async function deleteRecurringExpense(id: string) {
@@ -68,5 +74,5 @@ export async function deleteRecurringExpense(id: string) {
     .eq('user_id', user.id)
 
   if (error) throw new Error(error.message)
-  revalidatePath('/einstellungen')
+  revalidatePath('/', 'layout')
 }
