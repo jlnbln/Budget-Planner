@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Plus, X } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createExpense } from '@/actions/expenses'
+import { localDateString } from '@/lib/utils'
 import type { Category } from '@/types/database'
 
 interface AddExpenseModalProps {
@@ -20,14 +21,14 @@ export default function AddExpenseModal({ categories }: AddExpenseModalProps) {
   const [description, setDescription] = useState('')
   const [categoryId, setCategoryId] = useState<string>('')
   const [isFavorite, setIsFavorite] = useState(false)
-  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(() => localDateString())
 
   function reset() {
     setAmount('')
     setDescription('')
     setCategoryId('')
     setIsFavorite(false)
-    setDate(new Date().toISOString().split('T')[0])
+    setDate(localDateString())
   }
 
   async function handleSubmit(e: React.FormEvent) {

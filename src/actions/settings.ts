@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
 export async function updateBudget(amount: number) {
+  if (!Number.isFinite(amount) || amount <= 0) throw new Error('Ungültiger Betrag')
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')

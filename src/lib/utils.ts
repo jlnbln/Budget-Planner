@@ -57,3 +57,8 @@ export function getCurrentMonthYear(): { month: number; year: number } {
   const now = new Date()
   return { month: now.getMonth() + 1, year: now.getFullYear() }
 }
+
+/** Returns today's date as YYYY-MM-DD in the user's local timezone (not UTC). */
+export function localDateString(date = new Date()): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}

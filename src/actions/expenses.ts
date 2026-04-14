@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { localDateString } from '@/lib/utils'
 
 export async function removeFavorite(description: string, categoryId: string | null) {
   const supabase = await createClient()
@@ -35,7 +36,7 @@ export async function updateFavoriteTemplate(
   if (!user) throw new Error('Nicht angemeldet')
 
   // Find the most recent favorite with this description+category and update it
-  const { data: match } = await supabase
+  const baseQuery = supabase
     .from('expenses')
     .select('id')
     .eq('user_id', user.id)
@@ -43,7 +44,11 @@ export async function updateFavoriteTemplate(
     .eq('is_favorite', true)
     .order('expense_date', { ascending: false })
     .limit(1)
-    .maybeSingle()
+
+  const { data: match } = await (categoryId
+    ? baseQuery.eq('category_id', categoryId)
+    : baseQuery.is('category_id', null)
+  ).maybeSingle()
 
   if (!match) return
 
@@ -76,7 +81,7 @@ export async function createExpense(data: {
     amount: data.amount,
     description: data.description,
     category_id: data.category_id ?? null,
-    expense_date: data.expense_date ?? new Date().toISOString().split('T')[0],
+    expense_date: data.expense_date ?? localDateString(),
     is_favorite: data.is_favorite ?? false,
   })
 

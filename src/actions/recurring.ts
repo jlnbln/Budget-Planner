@@ -54,7 +54,28 @@ export async function updateRecurringExpense(
 
   if (error) throw new Error(error.message)
 
-  // If re-activating or changing amount/day, re-apply so the current month stays in sync.
+  // Patch the current month's already-created expense if display fields changed.
+  // applyRecurringExpenses only inserts missing rows — it won't update existing ones.
+  const expenseUpdates: Record<string, unknown> = {}
+  if (data.name !== undefined) expenseUpdates.description = data.name
+  if (data.amount !== undefined) expenseUpdates.amount = data.amount
+  if (data.category_id !== undefined) expenseUpdates.category_id = data.category_id
+
+  if (Object.keys(expenseUpdates).length > 0) {
+    const now = new Date()
+    const y = now.getFullYear()
+    const m = now.getMonth() + 1
+    const pad = (n: number) => String(n).padStart(2, '0')
+    await supabase
+      .from('expenses')
+      .update(expenseUpdates)
+      .eq('recurring_id', id)
+      .eq('user_id', user.id)
+      .gte('expense_date', `${y}-${pad(m)}-01`)
+      .lte('expense_date', `${y}-${pad(m)}-${pad(new Date(y, m, 0).getDate())}`)
+  }
+
+  // If re-activating, apply so the current month gets its entry if the day has passed.
   if (data.is_active !== false) {
     await applyRecurringExpenses(user.id)
   }
