@@ -56,7 +56,11 @@ export async function updateRecurringExpense(
 
   // Patch the current month's already-created expense if display fields changed.
   // applyRecurringExpenses only inserts missing rows — it won't update existing ones.
-  const expenseUpdates: Record<string, unknown> = {}
+  const expenseUpdates: {
+    description?: string
+    amount?: number
+    category_id?: string | null
+  } = {}
   if (data.name !== undefined) expenseUpdates.description = data.name
   if (data.amount !== undefined) expenseUpdates.amount = data.amount
   if (data.category_id !== undefined) expenseUpdates.category_id = data.category_id
