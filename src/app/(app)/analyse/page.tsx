@@ -1,16 +1,18 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useProfile, useExpenses, useCategories, useMonthlySavings } from '@/hooks/use-data'
+import dynamic from 'next/dynamic'
+import { useProfile, useExpenses, useMonthlySavings } from '@/hooks/use-data'
 import SavingsSummary from '@/components/analyse/SavingsSummary'
-import CategoryPieChart from '@/components/analyse/CategoryPieChart'
-import MonthlyTrendChart from '@/components/analyse/MonthlyTrendChart'
 import StatsGrid from '@/components/analyse/StatsGrid'
-import BudgetUtilizationChart from '@/components/analyse/BudgetUtilizationChart'
 import { computeMonthlyStats, computeAccumulatedSavings } from '@/lib/calculations'
 import { formatMonthShort } from '@/lib/utils'
 import { subMonths } from 'date-fns'
 import type { ExpenseWithCategory } from '@/types/database'
+
+const CategoryPieChart = dynamic(() => import('@/components/analyse/CategoryPieChart'), { ssr: false })
+const MonthlyTrendChart = dynamic(() => import('@/components/analyse/MonthlyTrendChart'), { ssr: false })
+const BudgetUtilizationChart = dynamic(() => import('@/components/analyse/BudgetUtilizationChart'), { ssr: false })
 
 export default function AnalysePage() {
   const now = useMemo(() => new Date(), [])
@@ -19,7 +21,6 @@ export default function AnalysePage() {
 
   const { data: profile } = useProfile()
   const { data: expenses = [], isLoading } = useExpenses(month, year)
-  const { data: categories = [] } = useCategories()
   const { data: pastSavings = [] } = useMonthlySavings()
 
   const budget = profile?.monthly_budget ?? 1000
