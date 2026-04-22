@@ -1,25 +1,27 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useInvalidate } from '@/hooks/use-data'
 import { runDailyCheck } from '@/actions/daily-check'
 
 interface Props {
   userId: string
-  budget: number
 }
 
-export default function DailyRecurringCheck({ userId, budget }: Props) {
-  const router = useRouter()
+export default function DailyRecurringCheck({ userId }: Props) {
+  const invalidate = useInvalidate()
 
   useEffect(() => {
-    runDailyCheck(userId, budget)
+    runDailyCheck(userId)
       .then((applied) => {
-        // If recurring expenses were newly applied, refresh so they appear immediately
-        if (applied) router.refresh()
+        if (applied) {
+          invalidate.expenses()
+          invalidate.savings()
+        }
       })
       .catch(() => {})
-  }, [userId, budget, router])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId])
 
   return null
 }

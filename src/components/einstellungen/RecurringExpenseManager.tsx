@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useInvalidate } from '@/hooks/use-data'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -41,7 +41,7 @@ export default function RecurringExpenseManager({
   recurringExpenses,
   categories,
 }: RecurringExpenseManagerProps) {
-  const router = useRouter()
+  const invalidate = useInvalidate()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editing, setEditing] = useState<RecurringExpense | null>(null)
   const [form, setForm] = useState<RecurringFormData>(EMPTY_FORM)
@@ -70,7 +70,7 @@ export default function RecurringExpenseManager({
     try {
       await updateRecurringExpense(rec.id, { is_active: !rec.is_active })
       toast.success(rec.is_active ? 'Deaktiviert' : 'Aktiviert')
-      router.refresh()
+      invalidate.recurring()
     } catch {
       toast.error('Fehler')
     }
@@ -108,7 +108,8 @@ export default function RecurringExpenseManager({
         toast.success('Erstellt')
       }
       setSheetOpen(false)
-      router.refresh()
+      invalidate.recurring()
+      invalidate.expenses()
     } catch {
       toast.error('Fehler beim Speichern')
     } finally {
@@ -126,7 +127,7 @@ export default function RecurringExpenseManager({
       await deleteRecurringExpense(id)
       toast.success('Gelöscht')
       setDeleteConfirm(null)
-      router.refresh()
+      invalidate.recurring()
     } catch {
       toast.error('Fehler beim Löschen')
     } finally {

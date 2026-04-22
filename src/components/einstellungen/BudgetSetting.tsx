@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useInvalidate } from '@/hooks/use-data'
 import { Pencil, Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,7 +14,7 @@ interface BudgetSettingProps {
 }
 
 export default function BudgetSetting({ budget }: BudgetSettingProps) {
-  const router = useRouter()
+  const invalidate = useInvalidate()
   const [editing, setEditing] = useState(false)
   const [value, setValue] = useState(budget.toString().replace('.', ','))
   const [loading, setLoading] = useState(false)
@@ -30,7 +30,7 @@ export default function BudgetSetting({ budget }: BudgetSettingProps) {
       await updateBudget(amount)
       toast.success('Budget aktualisiert')
       setEditing(false)
-      router.refresh()
+      invalidate.profile()
     } catch {
       toast.error('Fehler beim Speichern')
     } finally {

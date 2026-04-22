@@ -1,6 +1,5 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { applyRecurringExpenses } from '@/lib/recurring'
 
@@ -25,11 +24,7 @@ export async function createRecurringExpense(data: {
 
   if (error) throw new Error(error.message)
 
-  // Apply immediately so the new expense is created for the current month
-  // if its day_of_month has already passed. The upsert is idempotent.
   await applyRecurringExpenses(user.id)
-
-  revalidatePath('/', 'layout')
 }
 
 export async function updateRecurringExpense(
@@ -54,8 +49,6 @@ export async function updateRecurringExpense(
 
   if (error) throw new Error(error.message)
 
-  // Patch the current month's already-created expense if display fields changed.
-  // applyRecurringExpenses only inserts missing rows — it won't update existing ones.
   const expenseUpdates: {
     description?: string
     amount?: number
@@ -79,12 +72,9 @@ export async function updateRecurringExpense(
       .lte('expense_date', `${y}-${pad(m)}-${pad(new Date(y, m, 0).getDate())}`)
   }
 
-  // If re-activating, apply so the current month gets its entry if the day has passed.
   if (data.is_active !== false) {
     await applyRecurringExpenses(user.id)
   }
-
-  revalidatePath('/', 'layout')
 }
 
 export async function deleteRecurringExpense(id: string) {
@@ -99,5 +89,4 @@ export async function deleteRecurringExpense(id: string) {
     .eq('user_id', user.id)
 
   if (error) throw new Error(error.message)
-  revalidatePath('/', 'layout')
 }

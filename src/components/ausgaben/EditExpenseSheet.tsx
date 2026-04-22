@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useInvalidate } from '@/hooks/use-data'
 import { Trash2 } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -22,7 +22,7 @@ export default function EditExpenseSheet({
   open,
   onOpenChange,
 }: EditExpenseSheetProps) {
-  const router = useRouter()
+  const invalidate = useInvalidate()
   const [loading, setLoading] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -66,7 +66,8 @@ export default function EditExpenseSheet({
       })
       toast.success('Ausgabe aktualisiert')
       onOpenChange(false)
-      router.refresh()
+      invalidate.expenses()
+      invalidate.favorites()
     } catch {
       toast.error('Fehler beim Speichern')
     } finally {
@@ -85,7 +86,8 @@ export default function EditExpenseSheet({
       await deleteExpense(expense.id)
       toast.success('Ausgabe gelöscht')
       onOpenChange(false)
-      router.refresh()
+      invalidate.expenses()
+      invalidate.favorites()
     } catch {
       toast.error('Fehler beim Löschen')
     } finally {

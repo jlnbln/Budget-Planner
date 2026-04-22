@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useInvalidate } from '@/hooks/use-data'
 import { Plus, X } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createExpense } from '@/actions/expenses'
@@ -14,7 +14,7 @@ interface AddExpenseModalProps {
 }
 
 export default function AddExpenseModal({ categories }: AddExpenseModalProps) {
-  const router = useRouter()
+  const invalidate = useInvalidate()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [amount, setAmount] = useState('')
@@ -50,7 +50,8 @@ export default function AddExpenseModal({ categories }: AddExpenseModalProps) {
       toast.success('Ausgabe hinzugefügt')
       setOpen(false)
       reset()
-      router.refresh()
+      invalidate.expenses()
+      invalidate.favorites()
     } catch {
       toast.error('Fehler beim Speichern')
     } finally {

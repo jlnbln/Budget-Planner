@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useInvalidate } from '@/hooks/use-data'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,7 +28,7 @@ const DEFAULT_COLORS = [
 ]
 
 export default function CategoryManager({ categories }: CategoryManagerProps) {
-  const router = useRouter()
+  const invalidate = useInvalidate()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [form, setForm] = useState<CategoryFormData>({ name: '', color: '#4ade80', emoji: '📦' })
@@ -62,7 +62,9 @@ export default function CategoryManager({ categories }: CategoryManagerProps) {
         toast.success('Kategorie erstellt')
       }
       setSheetOpen(false)
-      router.refresh()
+      invalidate.categories()
+      invalidate.expenses()
+      invalidate.favorites()
     } catch {
       toast.error('Fehler beim Speichern')
     } finally {
@@ -80,7 +82,9 @@ export default function CategoryManager({ categories }: CategoryManagerProps) {
       await deleteCategory(id)
       toast.success('Kategorie gelöscht')
       setDeleteConfirm(null)
-      router.refresh()
+      invalidate.categories()
+      invalidate.expenses()
+      invalidate.favorites()
     } catch {
       toast.error('Fehler beim Löschen')
     } finally {

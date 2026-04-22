@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useInvalidate } from '@/hooks/use-data'
 import { Star, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,7 +19,7 @@ interface FavoriteManagerProps {
 }
 
 export default function FavoriteManager({ favorites, categories }: FavoriteManagerProps) {
-  const router = useRouter()
+  const invalidate = useInvalidate()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editing, setEditing] = useState<ExpenseWithCategory | null>(null)
   const [amount, setAmount] = useState('')
@@ -56,7 +56,8 @@ export default function FavoriteManager({ favorites, categories }: FavoriteManag
       )
       toast.success('Favorit aktualisiert')
       setSheetOpen(false)
-      router.refresh()
+      invalidate.favorites()
+      invalidate.expenses()
     } catch {
       toast.error('Fehler beim Speichern')
     } finally {
@@ -75,7 +76,8 @@ export default function FavoriteManager({ favorites, categories }: FavoriteManag
       await removeFavorite(fav.description, fav.category?.id ?? null)
       toast.success('Aus Favoriten entfernt')
       setDeleteConfirm(null)
-      router.refresh()
+      invalidate.favorites()
+      invalidate.expenses()
     } catch {
       toast.error('Fehler')
     } finally {

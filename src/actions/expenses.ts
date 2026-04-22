@@ -1,6 +1,5 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { localDateString } from '@/lib/utils'
 
@@ -21,9 +20,6 @@ export async function removeFavorite(description: string, categoryId: string | n
   } else {
     await query.is('category_id', null)
   }
-
-  revalidatePath('/einstellungen')
-  revalidatePath('/dashboard')
 }
 
 export async function updateFavoriteTemplate(
@@ -35,7 +31,6 @@ export async function updateFavoriteTemplate(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Nicht angemeldet')
 
-  // Find the most recent favorite with this description+category and update it
   const baseQuery = supabase
     .from('expenses')
     .select('id')
@@ -60,9 +55,6 @@ export async function updateFavoriteTemplate(
       category_id: newData.category_id,
     })
     .eq('id', match.id)
-
-  revalidatePath('/einstellungen')
-  revalidatePath('/dashboard')
 }
 
 export async function createExpense(data: {
@@ -86,9 +78,6 @@ export async function createExpense(data: {
   })
 
   if (error) throw new Error(error.message)
-  revalidatePath('/dashboard')
-  revalidatePath('/ausgaben')
-  revalidatePath('/analyse')
 }
 
 export async function updateExpense(
@@ -112,9 +101,6 @@ export async function updateExpense(
     .eq('user_id', user.id)
 
   if (error) throw new Error(error.message)
-  revalidatePath('/dashboard')
-  revalidatePath('/ausgaben')
-  revalidatePath('/analyse')
 }
 
 export async function deleteExpense(id: string) {
@@ -129,7 +115,4 @@ export async function deleteExpense(id: string) {
     .eq('user_id', user.id)
 
   if (error) throw new Error(error.message)
-  revalidatePath('/dashboard')
-  revalidatePath('/ausgaben')
-  revalidatePath('/analyse')
 }

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useInvalidate } from '@/hooks/use-data'
 import { createExpense } from '@/actions/expenses'
 import type { ExpenseWithCategory } from '@/types/database'
 import { formatEuro } from '@/lib/utils'
@@ -12,7 +12,7 @@ interface FavoriteTilesProps {
 }
 
 export default function FavoriteTiles({ favorites }: FavoriteTilesProps) {
-  const router = useRouter()
+  const invalidate = useInvalidate()
   const [loading, setLoading] = useState<string | null>(null)
 
   if (favorites.length === 0) return null
@@ -27,7 +27,7 @@ export default function FavoriteTiles({ favorites }: FavoriteTilesProps) {
         is_favorite: true,
       })
       toast.success(`${expense.category?.emoji ?? '💸'} ${expense.description} hinzugefügt`)
-      router.refresh()
+      invalidate.expenses()
     } catch {
       toast.error('Fehler beim Hinzufügen')
     } finally {
