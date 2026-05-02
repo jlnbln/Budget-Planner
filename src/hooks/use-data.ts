@@ -8,6 +8,7 @@ import {
   fetchCategories,
   fetchFavorites,
   fetchRecurringExpenses,
+  fetchMonthlyTotals,
   fetchMonthlySavings,
 } from '@/lib/queries'
 
@@ -58,6 +59,15 @@ export function useRecurringExpenses() {
   return useSWR(
     user ? ['recurring', user.id] : null,
     () => fetchRecurringExpenses(user!.id),
+    SWR_OPTS,
+  )
+}
+
+export function useMonthlyTotals(from: string, to: string) {
+  const { data: user } = useUser()
+  return useSWR(
+    user ? ['monthly-totals', user.id, from, to] : null,
+    () => fetchMonthlyTotals(user!.id, from, to),
     SWR_OPTS,
   )
 }

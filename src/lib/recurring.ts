@@ -72,8 +72,21 @@ export async function checkAndFinalizeMonths(userId: string, currentBudget: numb
     startMonth++
     if (startMonth > 12) { startMonth = 1; startYear++ }
   } else {
-    // No savings yet — nothing to finalize
-    return
+    // No finalized months yet — find the earliest expense to know where to start
+    const { data: earliest } = await supabase
+      .from('expenses')
+      .select('expense_date')
+      .eq('user_id', userId)
+      .lt('expense_date', `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`)
+      .order('expense_date', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+
+    if (!earliest) return
+
+    const firstDate = new Date(earliest.expense_date)
+    startYear = firstDate.getFullYear()
+    startMonth = firstDate.getMonth() + 1
   }
 
   // Finalize all months from startMonth up to (but not including) current month

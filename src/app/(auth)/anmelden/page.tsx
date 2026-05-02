@@ -74,6 +74,9 @@ export default function AnmeldenPage() {
                   <label className="text-[10px] font-bold text-[#43474f] uppercase tracking-widest" htmlFor="password">
                     Passwort
                   </label>
+                  <Link href="/passwort-vergessen" className="text-[10px] font-semibold text-[#001939] hover:underline tracking-wide">
+                    Vergessen?
+                  </Link>
                 </div>
                 <div className="relative">
                   <input

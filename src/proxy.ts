@@ -27,7 +27,7 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
-  const isAuthPage = pathname.startsWith('/anmelden') || pathname.startsWith('/registrieren')
+  const isAuthPage = pathname.startsWith('/anmelden') || pathname.startsWith('/registrieren') || pathname.startsWith('/passwort-vergessen') || pathname.startsWith('/auth/')
   const isRoot = pathname === '/'
   const isAppPage = !isAuthPage && !isRoot
 
